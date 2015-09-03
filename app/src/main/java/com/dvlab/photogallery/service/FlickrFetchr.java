@@ -33,7 +33,7 @@ public class FlickrFetchr {
 
 
     @Nullable
-    private byte[] getUrlBytes(String urlSpec) throws IOException {
+    byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
