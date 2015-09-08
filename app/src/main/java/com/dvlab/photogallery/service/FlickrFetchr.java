@@ -22,11 +22,14 @@ import java.util.List;
 public class FlickrFetchr {
 
     public static final String TAG = FlickrFetchr.class.getSimpleName();
+    public static final String PREF_SEARCH_QUERY = "searchQuery";
 
     private static final String ENDPOINT = "https://api.flickr.com/services/rest/";
     private static final String API_KEY = "2af9cd87f876d505eeb111f0958e732e";
     private static final String METHOD_GET_RECENT = "flickr.photos.getRecent";
+    private static final String METHOD_SEARCH = "flickr.photos.search";
     private static final String PARAM_EXTRAS = "extras";
+    private static final String PARAM_TEXT = "text";
     private static final String EXTRA_SMALL_URL = "url_s";
 
     private static final String XML_PHOTO = "photo";
@@ -66,21 +69,10 @@ public class FlickrFetchr {
         }
     }
 
-    public List<GalleryItem> fetchItems(int page) {
-        if (page < 1) {
-            throw new IllegalArgumentException("Page must be greater than zero");
-        }
-
+    public List<GalleryItem> downloadGalleryItems(String url) {
         List<GalleryItem> items = new ArrayList<>();
 
         try {
-            String url = Uri.parse(ENDPOINT).buildUpon()
-                    .appendQueryParameter("method", METHOD_GET_RECENT)
-                    .appendQueryParameter("api_key", API_KEY)
-                    .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
-                    .appendQueryParameter("page", String.format("%d", page))
-                    .build().toString();
-
             Log.i(TAG, "URL: " + url);
 
             String xmlString = getUrl(url);
@@ -99,6 +91,36 @@ public class FlickrFetchr {
         }
 
         return items;
+    }
+
+    public List<GalleryItem> fetchItems() {
+        return fetchItems(1);
+    }
+
+    public List<GalleryItem> fetchItems(int page) {
+        if (page < 1) {
+            throw new IllegalArgumentException("Page must be greater than zero");
+        }
+
+        String url = Uri.parse(ENDPOINT).buildUpon()
+                .appendQueryParameter("method", METHOD_GET_RECENT)
+                .appendQueryParameter("api_key", API_KEY)
+                .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
+                .appendQueryParameter("page", String.format("%d", page))
+                .build().toString();
+
+        return downloadGalleryItems(url);
+    }
+
+    public List<GalleryItem> search(String query) {
+        String url = Uri.parse(ENDPOINT).buildUpon()
+                .appendQueryParameter("method", METHOD_SEARCH)
+                .appendQueryParameter("api_key", API_KEY)
+                .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
+                .appendQueryParameter(PARAM_TEXT, query)
+                .build().toString();
+
+        return downloadGalleryItems(url);
     }
 
     void parseItems(List<GalleryItem> items, XmlPullParser parser) throws XmlPullParserException, IOException {

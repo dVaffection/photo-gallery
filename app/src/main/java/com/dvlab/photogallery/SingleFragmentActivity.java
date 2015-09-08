@@ -1,9 +1,12 @@
 package com.dvlab.photogallery;
 
+import android.app.SearchManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 
 abstract public class SingleFragmentActivity extends ActionBarActivity {
 
