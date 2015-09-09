@@ -28,6 +28,7 @@ import android.widget.ImageView;
 
 import com.dvlab.photogallery.model.GalleryItem;
 import com.dvlab.photogallery.service.FlickrFetchr;
+import com.dvlab.photogallery.service.PollService;
 import com.dvlab.photogallery.service.ThumbnailDownloader;
 
 import java.util.ArrayList;
@@ -56,8 +57,7 @@ public class PhotoGalleryFragment extends Fragment {
         setHasOptionsMenu(true);
 
         updateItems();
-//        task = new FetchItemsTask();
-//        task.execute();
+
 
         thumbnailThread = new ThumbnailDownloader<>(new Handler());
         thumbnailThread.setListener(new ThumbnailDownloader.Listener<ImageView>() {
@@ -129,8 +129,6 @@ public class PhotoGalleryFragment extends Fragment {
         inflater.inflate(R.menu.fragment_photo_gallery, menu);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            Log.i(TAG, "onCreateOptionsMenu");
-
             // Pull out the SearchView
             MenuItem searchItem = menu.findItem(R.id.menu_item_search);
             SearchView searchView = (SearchView) searchItem.getActionView();
@@ -141,16 +139,6 @@ public class PhotoGalleryFragment extends Fragment {
             ComponentName name = getActivity().getComponentName();
             SearchableInfo searchInfo = searchManager.getSearchableInfo(name);
             searchView.setSearchableInfo(searchInfo);
-
-            String query = PreferenceManager.getDefaultSharedPreferences(getActivity())
-                    .getString(FlickrFetchr.PREF_SEARCH_QUERY, null);
-
-
-            if (!TextUtils.isEmpty(query)) {
-                searchItem.expandActionView();
-                searchView.setQuery(query, false);
-                searchView.clearFocus();
-            }
         }
     }
 
@@ -166,10 +154,52 @@ public class PhotoGalleryFragment extends Fragment {
                         .edit()
                         .putString(FlickrFetchr.PREF_SEARCH_QUERY, null)
                         .commit();
+
+                // otherwise `onPrepareOptionsMenu` is not called
+                getActivity().invalidateOptionsMenu();
+
                 updateItems();
+                return true;
+            case R.id.menu_item_toggle_polling:
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    // otherwise `onPrepareOptionsMenu` is not called
+                    getActivity().invalidateOptionsMenu();
+                }
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        // changing title for polling Flickr menu item
+        MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
+
+        if (PollService.isServiceAlarmOn(getActivity())) {
+            toggleItem.setTitle(R.string.stop_polling);
+        } else {
+            toggleItem.setTitle(R.string.start_polling);
+        }
+
+
+        // removing query from the search input
+        // Why here and not in `onOptionsItemSelected`?
+        // Well, looks like this is the only place where we can reach out menu item
+
+        MenuItem searchItem = menu.findItem(R.id.menu_item_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        String query = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                .getString(FlickrFetchr.PREF_SEARCH_QUERY, null);
+        if (TextUtils.isEmpty(query)) {
+            searchView.setQuery("", false);
         }
     }
 
