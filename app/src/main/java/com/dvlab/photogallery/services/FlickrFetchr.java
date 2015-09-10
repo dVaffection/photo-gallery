@@ -1,10 +1,10 @@
-package com.dvlab.photogallery.service;
+package com.dvlab.photogallery.services;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.dvlab.photogallery.model.GalleryItem;
+import com.dvlab.photogallery.entities.GalleryItem;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

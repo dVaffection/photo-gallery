@@ -1,4 +1,4 @@
-package com.dvlab.photogallery.model;
+package com.dvlab.photogallery.entities;
 
 public class GalleryItem {
 

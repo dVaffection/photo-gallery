@@ -1,4 +1,4 @@
-package com.dvlab.photogallery;
+package com.dvlab.photogallery.ui;
 
 import android.app.SearchManager;
 import android.content.Intent;
@@ -7,7 +7,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
-import com.dvlab.photogallery.service.FlickrFetchr;
+import com.dvlab.photogallery.R;
+import com.dvlab.photogallery.services.FlickrFetchr;
 
 public class PhotoGalleryActivity extends SingleFragmentActivity {
 

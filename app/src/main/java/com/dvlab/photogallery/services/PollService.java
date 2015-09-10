@@ -1,9 +1,9 @@
-package com.dvlab.photogallery.service;
+package com.dvlab.photogallery.services;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -14,9 +14,9 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
-import com.dvlab.photogallery.PhotoGalleryActivity;
 import com.dvlab.photogallery.R;
-import com.dvlab.photogallery.model.GalleryItem;
+import com.dvlab.photogallery.entities.GalleryItem;
+import com.dvlab.photogallery.ui.PhotoGalleryActivity;
 
 import java.util.List;
 
@@ -25,6 +25,11 @@ public class PollService extends IntentService {
     private static final String TAG = PollService.class.getSimpleName();
     // 60 seconds is a minimum value since 5.1
     private static final int POLL_INTERVAL = 1000 * 60;
+    public static final String PREF_IS_ALARM_ON = "isAlarmOn";
+
+    public static final String ACTION_NEW_PHOTOS_NOTIFICATION = "com.dvlab.photogallery.ACTION_NEW_PHOTOS_NOTIFICATION";
+    public static final String PERM_PRIVATE = "com.dvlab.photogallery.PRIVATE";
+
 
     public PollService() {
         super(TAG);
@@ -43,13 +48,18 @@ public class PollService extends IntentService {
         String query = prefs.getString(FlickrFetchr.PREF_SEARCH_QUERY, null);
         String lastResultId = prefs.getString(FlickrFetchr.PREF_LAST_RESULT_ID, null);
         List<GalleryItem> items;
+
         if (query != null) {
             items = new FlickrFetchr().search(query);
         } else {
             items = new FlickrFetchr().fetchItems();
         }
-        if (items.size() == 0)
+
+        if (items.size() == 0) {
             return;
+        }
+
+
         String resultId = items.get(0).getId();
         if (!resultId.equals(lastResultId)) {
             Log.i(TAG, "Got a new result: " + resultId);
@@ -66,8 +76,8 @@ public class PollService extends IntentService {
                     .setAutoCancel(true)
                     .build();
 
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(0, notification);
+            // `NotificationManager` moved to `NotificationReceiver`
+            showBackgroundNotification(0, notification);
         } else {
             Log.i(TAG, "Got an old result: " + resultId);
         }
@@ -77,6 +87,16 @@ public class PollService extends IntentService {
                 .commit();
 
     }
+
+    // we send ordered message so `VisibleFragment.onShowNotificationReceiver` receives it first
+    void showBackgroundNotification(int notificationId, Notification notification) {
+        Intent intent = new Intent(ACTION_NEW_PHOTOS_NOTIFICATION);
+        intent.putExtra("NOTIFICATION_ID", notificationId);
+        intent.putExtra("NOTIFICATION", notification);
+
+        sendOrderedBroadcast(intent, PERM_PRIVATE, null, null, Activity.RESULT_OK, null, null);
+    }
+
 
     public static void setServiceAlarm(Context context, boolean isOn) {
         Intent intent = new Intent(context, PollService.class);
@@ -89,6 +109,11 @@ public class PollService extends IntentService {
             alarmManager.cancel(pendingIntent);
             pendingIntent.cancel();
         }
+
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(PollService.PREF_IS_ALARM_ON, isOn)
+                .commit();
     }
 
     public static boolean isServiceAlarmOn(Context context) {

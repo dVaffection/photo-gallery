@@ -1,4 +1,4 @@
-package com.dvlab.photogallery.service;
+package com.dvlab.photogallery.services;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;

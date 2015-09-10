@@ -1,4 +1,4 @@
-package com.dvlab.photogallery;
+package com.dvlab.photogallery.ui;
 
 
 import android.app.Activity;
@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,15 +25,16 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-import com.dvlab.photogallery.model.GalleryItem;
-import com.dvlab.photogallery.service.FlickrFetchr;
-import com.dvlab.photogallery.service.PollService;
-import com.dvlab.photogallery.service.ThumbnailDownloader;
+import com.dvlab.photogallery.R;
+import com.dvlab.photogallery.entities.GalleryItem;
+import com.dvlab.photogallery.services.FlickrFetchr;
+import com.dvlab.photogallery.services.PollService;
+import com.dvlab.photogallery.services.ThumbnailDownloader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhotoGalleryFragment extends Fragment {
+public class PhotoGalleryFragment extends VisibleFragment {
 
     public static final String TAG = PhotoGalleryFragment.class.getSimpleName();
 
