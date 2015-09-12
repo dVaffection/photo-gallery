@@ -32,6 +32,7 @@ public class FlickrFetchr {
     private static final String PARAM_EXTRAS = "extras";
     private static final String PARAM_TEXT = "text";
     private static final String EXTRA_SMALL_URL = "url_s";
+    private static final String EXTRA_LARGE_URL = "url_l";
 
     private static final String XML_PHOTO = "photo";
 
@@ -106,7 +107,7 @@ public class FlickrFetchr {
         String url = Uri.parse(ENDPOINT).buildUpon()
                 .appendQueryParameter("method", METHOD_GET_RECENT)
                 .appendQueryParameter("api_key", API_KEY)
-                .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
+                .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL + "," + EXTRA_LARGE_URL)
                 .appendQueryParameter("page", String.format("%d", page))
                 .build().toString();
 
@@ -117,7 +118,7 @@ public class FlickrFetchr {
         String url = Uri.parse(ENDPOINT).buildUpon()
                 .appendQueryParameter("method", METHOD_SEARCH)
                 .appendQueryParameter("api_key", API_KEY)
-                .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL)
+                .appendQueryParameter(PARAM_EXTRAS, EXTRA_SMALL_URL + "," + EXTRA_LARGE_URL)
                 .appendQueryParameter(PARAM_TEXT, query)
                 .build().toString();
 
@@ -132,11 +133,15 @@ public class FlickrFetchr {
                 String id = parser.getAttributeValue(null, "id");
                 String caption = parser.getAttributeValue(null, "title");
                 String smallUrl = parser.getAttributeValue(null, EXTRA_SMALL_URL);
+                String largeUrl = parser.getAttributeValue(null, EXTRA_LARGE_URL);
+                String owner = parser.getAttributeValue(null, "owner");
 
                 GalleryItem item = new GalleryItem();
                 item.setId(id);
                 item.setCaption(caption);
                 item.setUrl(smallUrl);
+                item.setLargeUrl(largeUrl);
+                item.setOwner(owner);
                 items.add(item);
             }
 

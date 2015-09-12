@@ -12,7 +12,7 @@ import com.dvlab.photogallery.services.PollService;
 
 // This fragment subscribes for "com.dvlab.photogallery.ACTION_NEW_PHOTOS_NOTIFICATION" messages when visible
 // so it intercepts "new photos" message and cancels it. Otherwise message broadcasts further to `NotificationReceiver`
-public class VisibleFragment extends Fragment {
+abstract public class VisibleFragment extends Fragment {
 
     public static final String TAG = "VisibleFragment";
     private BroadcastReceiver onShowNotificationReceiver = new BroadcastReceiver() {
